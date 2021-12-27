@@ -33,6 +33,7 @@ function updateState() {
 }
 
 function animate(time) {
+  if (isNaN(time)) time = 0;
   if (prevTime === undefined) prevTime = time;
   const deltaTime = Math.max(time - prevTime, 0);
   prevTime = time;
