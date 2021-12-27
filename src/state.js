@@ -1,6 +1,6 @@
 const state = {
   backgroundColor: "#131619",
-  cubeSize: 1.0,
+  animateCamera: true,
 };
 
 /*

@@ -1,8 +1,17 @@
-# CreativeSketchTemplate
+# Drama Lights
 
-A (hopefully) quicker way to stand up a Javascript creative coding environment focused on 3D realtime with Three.js.
+Area lights just look dramatic, idk!
 
-## Organization
+## Ideas
 
-- All files meant to be customized are in `/src`
-- `Main.js` is the app entry point and runs the app based on the `settings` exported from `src/sketch.js`
+[ ] Top area flood light
+[ ] Post processing stack
+
+[ ] Off axis rotation of lights
+[ ] Non-circular arangements
+[ ] Very stylized hero mesh
+[ ] Randomized hero mesh settings and type
+[ ] Pull in color library for lighting colors
+[ ] Various camera animations
+[ ] Ensure on a loop for output
+[ ] Video export

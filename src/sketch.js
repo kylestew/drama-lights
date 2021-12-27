@@ -30,26 +30,28 @@ class Sketch {
     this.camera.updateProjectionMatrix();
   }
 
+  _createRectLight(color, intensity, width, height, position) {
+    const rectLight = new THREE.RectAreaLight(color, intensity, width, height);
+    rectLight.position.set(position.x, position.y, position.z);
+    return rectLight;
+  }
+
   _createLights(scene) {
-    const LIGHT_COUNT = 5;
+    const LIGHT_COUNT = 9;
     const RADIUS = 12;
     const step = 1.0 / LIGHT_COUNT;
     for (let i = 0; i < 1; i += step) {
       let theta = i * 2.0 * Math.PI;
-
-      let color = new THREE.Color().setHSL(i, 0.8, 0.5);
-      const rectLight = new THREE.RectAreaLight(color, 5, 4, 10);
-      rectLight.position.set(
-        RADIUS * Math.cos(theta),
+      const rectLight = this._createRectLight(
+        new THREE.Color().setHSL(i, 0.8, 0.5),
         5,
-        RADIUS * Math.sin(theta)
+        4,
+        10,
+        new THREE.Vector3(RADIUS * Math.cos(theta), 5, RADIUS * Math.sin(theta))
       );
-      rectLight.lookAt(0, 0, 0);
-
-      // console.log(i, theta, color);
-
+      rectLight.lookAt(0, 5, 0);
       scene.add(rectLight);
-      // scene.add(new RectAreaLightHelper(rectLight));
+      scene.add(new RectAreaLightHelper(rectLight));
     }
   }
 
@@ -81,7 +83,7 @@ class Sketch {
     this._createMesh(scene);
 
     // floor
-    const geoFloor = new THREE.BoxGeometry(100, 0.1, 100);
+    const geoFloor = new THREE.BoxGeometry(300, 0.1, 300);
     const matStdFloor = new THREE.MeshStandardMaterial({
       color: 0x808080,
       roughness: 0.1,
@@ -91,10 +93,22 @@ class Sketch {
     meshStdFloor.position.set(0, -0.1, 0); // drop down to not touch lights
     scene.add(meshStdFloor);
 
+    // fill light
+    const fillLight = this._createRectLight(
+      new THREE.Color().setHSL(0, 0, 1),
+      2,
+      20,
+      20,
+      new THREE.Vector3(0, 30, 0)
+    );
+    fillLight.lookAt(0, 0, 0);
+    scene.add(fillLight);
+    scene.add(new RectAreaLightHelper(fillLight));
+
     this.scene = scene;
   }
 
-  _update(time, deltaTime) {
+  _update(time, deltaTime, { animateCamera }) {
     // animate mesh
     const mesh = this.scene.getObjectByName("hero");
     time /= 2.0;
@@ -102,16 +116,18 @@ class Sketch {
     mesh.rotation.x = 1.0 * Math.PI * Math.cos(time);
 
     // animate camera
-    this.camera.position.x = 8 * Math.cos(time);
-    this.camera.position.y = 20 + 8 * Math.sin(time);
-    this.camera.position.z = 8 * Math.sin(time);
-    this.camera.lookAt(mesh.position);
-    // this.camera.updateProjectionMatrix();
+    if (animateCamera) {
+      this.camera.position.x = 8 * Math.cos(time);
+      this.camera.position.y = 20 + 8 * Math.sin(time);
+      this.camera.position.z = 8 * Math.sin(time);
+      this.camera.lookAt(mesh.position);
+    } else {
+      this.controls.update();
+    }
   }
 
   render(time, deltaTime, state) {
-    this._update(time, deltaTime);
-    // this.controls.update();
+    this._update(time, deltaTime, state);
     this.renderer.render(this.scene, this.camera);
   }
 }
