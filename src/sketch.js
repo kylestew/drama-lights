@@ -1,6 +1,8 @@
 import * as THREE from "three";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper";
+import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib";
 
 class Sketch {
   constructor() {
@@ -12,7 +14,7 @@ class Sketch {
     document.body.appendChild(this.renderer.domElement);
 
     this.camera = new THREE.PerspectiveCamera(55, 1, 0.01, 100);
-    this.camera.position.set(2, 3, 5);
+    this.camera.position.set(0, 8, -16);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.minDistance = 0.5;
@@ -32,22 +34,29 @@ class Sketch {
     let scene = new THREE.Scene();
     scene.background = new THREE.Color(backgroundColor);
 
-    const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
-      // wireframe: true,
+    // adds reflrections!?
+    RectAreaLightUniformsLib.init();
+
+    const rectLight1 = new THREE.RectAreaLight(0xff0000, 5, 4, 10);
+    rectLight1.position.set(0, 5, 5);
+    scene.add(rectLight1);
+
+    scene.add(new RectAreaLightHelper(rectLight1));
+
+    const geoFloor = new THREE.BoxGeometry(100, 0.1, 100);
+    const matStdFloor = new THREE.MeshStandardMaterial({
+      color: 0x808080,
+      roughness: 0.1,
+      metalness: 0,
     });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    this.cube = cube;
+    const meshStdFloor = new THREE.Mesh(geoFloor, matStdFloor);
+    meshStdFloor.position.set(0, -0.1, 0); // drop down to not touch lights
+    scene.add(meshStdFloor);
 
     this.scene = scene;
   }
 
-  _update(time, deltaTime) {
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
-  }
+  _update(time, deltaTime) {}
 
   render(time, deltaTime, state) {
     this._update(time, deltaTime);
