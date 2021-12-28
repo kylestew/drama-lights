@@ -15,6 +15,9 @@ animate();
 function init() {
   sketch = new Sketch();
 
+  window.onresize = onWindowResize;
+  onWindowResize(); // set initial size
+
   state = createState(updateState);
   updateState(); // push initial state
 
@@ -23,9 +26,6 @@ function init() {
   stats = new Stats();
   stats.showPanel(0);
   document.body.appendChild(stats.dom);
-
-  window.onresize = onWindowResize;
-  onWindowResize(); // set initial size
 }
 
 function updateState() {

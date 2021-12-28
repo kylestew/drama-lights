@@ -1,3 +1,6 @@
 [submodule "snod"]
 	path = snod
 	url = git@github.com:kylestew/snod.git
+[submodule "some-luts"]
+	path = some-luts
+	url = https://github.com/kylestew/some-luts.git

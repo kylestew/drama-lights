@@ -4,9 +4,8 @@ Area lights just look dramatic, idk!
 
 ## Ideas
 
-[ ] Top area flood light
-[ ] Post processing stack
-
+[x] Top area flood light
+[x] Post processing stack
 [ ] Off axis rotation of lights
 [ ] Non-circular arangements
 [ ] Very stylized hero mesh

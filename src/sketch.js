@@ -4,12 +4,22 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib";
 
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
+import { GammaCorrectionShader } from "three/examples/jsm/shaders/GammaCorrectionShader";
+import { BrightnessContrastShader } from "three/examples/jsm/shaders/BrightnessContrastShader";
+import { LUTPass } from "three/examples/jsm/postprocessing/LUTPass";
+
 class Sketch {
   constructor() {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true,
     });
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1;
     this.renderer.domElement.id = "render-canvas";
     document.body.appendChild(this.renderer.domElement);
 
@@ -26,6 +36,9 @@ class Sketch {
     this.size = [width, height];
     this.renderer.setPixelRatio = dpr;
     this.renderer.setSize(width, height);
+    if (this.composer) {
+      this.composer.setSize(width, height);
+    }
     this.camera.aspect = width / innerHeight;
     this.camera.updateProjectionMatrix();
   }
@@ -38,13 +51,14 @@ class Sketch {
 
   _createLights(scene) {
     const LIGHT_COUNT = 9;
+    const LIGHT_WIDTH = 4;
     const RADIUS = 12;
     const step = 1.0 / LIGHT_COUNT;
     for (let i = 0; i < 1; i += step) {
       let theta = i * 2.0 * Math.PI;
       const rectLight = this._createRectLight(
-        new THREE.Color().setHSL(i, 0.8, 0.5),
-        5,
+        new THREE.Color().setHSL(i, 0.9, 0.5),
+        LIGHT_WIDTH,
         4,
         10,
         new THREE.Vector3(RADIUS * Math.cos(theta), 5, RADIUS * Math.sin(theta))
@@ -69,9 +83,53 @@ class Sketch {
     scene.add(meshKnot);
   }
 
-  updateState({ backgroundColor, cubeSize }) {
+  _createPostPipeline(
+    scene,
+    {
+      lut,
+      lutIntensity,
+      bloomStrength,
+      bloomRadius,
+      bloomThreshold,
+      brightness,
+      contrast,
+    }
+  ) {
+    const renderPass = new RenderPass(scene, this.camera);
+    const composer = new EffectComposer(this.renderer);
+    composer.addPass(renderPass);
+
+    if (this.size) {
+      const [width, height] = this.size;
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(width, height),
+        bloomStrength,
+        bloomRadius,
+        bloomThreshold
+      );
+      composer.addPass(bloomPass);
+    }
+
+    // composer.addPass(new ShaderPass(GammaCorrectionShader));
+
+    let brightContrastPass = new ShaderPass(BrightnessContrastShader);
+    brightContrastPass.uniforms["brightness"].value = brightness;
+    brightContrastPass.uniforms["contrast"].value = contrast;
+    composer.addPass(brightContrastPass);
+
+    if (lut) {
+      let lutPass = new LUTPass();
+      lutPass.lut = lut.texture3D;
+      (lutPass.intensity = lutIntensity), (lutPass.enabled = true);
+      composer.addPass(lutPass);
+    }
+
+    this.composer = composer;
+  }
+
+  updateState(state) {
     let scene = new THREE.Scene();
-    scene.background = new THREE.Color(backgroundColor);
+    scene.background = new THREE.Color(state.backgroundColor);
 
     // adds reflrections!?
     RectAreaLightUniformsLib.init();
@@ -105,6 +163,9 @@ class Sketch {
     scene.add(fillLight);
     scene.add(new RectAreaLightHelper(fillLight));
 
+    // post processing worfklow
+    this._createPostPipeline(scene, state);
+
     this.scene = scene;
   }
 
@@ -128,7 +189,11 @@ class Sketch {
 
   render(time, deltaTime, state) {
     this._update(time, deltaTime, state);
-    this.renderer.render(this.scene, this.camera);
+    if (this.composer) {
+      this.composer.render(this.scene, this.camera);
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 }
 
