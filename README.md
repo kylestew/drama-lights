@@ -6,6 +6,9 @@ Area lights just look dramatic, idk!
 
 [x] Top area flood light
 [x] Post processing stack
+
+[ ] Physical Material workflow
+
 [ ] Off axis rotation of lights
 [ ] Non-circular arangements
 [ ] Very stylized hero mesh

@@ -72,10 +72,12 @@ class Sketch {
   _createMesh(scene) {
     // TODO: make generative
     const geoKnot = new THREE.TorusKnotGeometry(1.5, 0.5, 200, 16);
-    const matKnot = new THREE.MeshStandardMaterial({
+    const matKnot = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
-      roughness: 0,
-      metalness: 0,
+      roughness: 0.2,
+      metalness: 1.0,
+      // roughness: 0,
+      // metalness: 0,
     });
     const meshKnot = new THREE.Mesh(geoKnot, matKnot);
     meshKnot.name = "hero";
