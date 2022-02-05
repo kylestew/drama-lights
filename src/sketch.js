@@ -49,11 +49,10 @@ class Sketch {
     return rectLight;
   }
 
-  _createLights(scene) {
-    const LIGHT_COUNT = 9;
+  _createLights(scene, { lightCount }) {
     const LIGHT_WIDTH = 4;
     const RADIUS = 12;
-    const step = 1.0 / LIGHT_COUNT;
+    const step = 1.0 / lightCount;
     for (let i = 0; i < 1; i += step) {
       let theta = i * 2.0 * Math.PI;
       const rectLight = this._createRectLight(
@@ -83,6 +82,7 @@ class Sketch {
     meshKnot.name = "hero";
     meshKnot.position.set(0, 5, 0);
     scene.add(meshKnot);
+    return meshKnot;
   }
 
   _createPostPipeline(
@@ -131,16 +131,17 @@ class Sketch {
 
   updateState(state) {
     let scene = new THREE.Scene();
-    scene.background = new THREE.Color(state.backgroundColor);
 
     // adds reflrections!?
     RectAreaLightUniformsLib.init();
 
     // generative lights
-    this._createLights(scene);
+    this._createLights(scene, state);
 
     // generative mesh
-    this._createMesh(scene);
+    const mesh = this._createMesh(scene);
+    // lock controls to mesh
+    this.controls.target.copy(mesh.position);
 
     // floor
     const geoFloor = new THREE.BoxGeometry(300, 0.1, 300);
@@ -166,7 +167,7 @@ class Sketch {
     scene.add(new RectAreaLightHelper(fillLight));
 
     // post processing worfklow
-    this._createPostPipeline(scene, state);
+    // this._createPostPipeline(scene, state);
 
     this.scene = scene;
   }

@@ -3,8 +3,9 @@ import { LUTCubeLoader } from "three/examples/jsm/loaders/LUTCubeLoader";
 import lutUrl from "/some-luts/gsg/01_Basics/GSG_LUT_Basic_Contrasy.cube?url";
 
 const state = {
-  backgroundColor: "#131619",
   animateCamera: true,
+
+  lightCount: 6,
 
   lut: undefined,
   lutIntensity: 0.8,
